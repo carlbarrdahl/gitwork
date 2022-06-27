@@ -1,0 +1,29 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@octokit/core": "^3.6.0",
+    "ethers": "^5.6.9",
+    "next": "12.1.6",
+    "next-connect": "^0.12.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/react": "18.0.14",
+    "eslint": "8.18.0",
+    "eslint-config-custom": "workspace:*",
+    "next-transpile-modules": "9.0.0",
+    "tsconfig": "workspace:*",
+    "typescript": "^4.7.4"
+  }
+}
