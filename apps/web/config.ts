@@ -12,9 +12,3 @@ export const config = {
     },
   },
 };
-
-// export const contractTypes = {
-//   project: Project.abi,
-//   bountyRegi: ProjectFactory.abi,
-//   token: ERC20Token.abi,
-// };
