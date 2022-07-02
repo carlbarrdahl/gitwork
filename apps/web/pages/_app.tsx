@@ -1,5 +1,6 @@
 import { AppProps } from "next/app";
 import ThemeProvider from "ui";
+import { SessionProvider } from "next-auth/react";
 
 import "@rainbow-me/rainbowkit/styles.css";
 
@@ -16,12 +17,14 @@ const { connectors } = getDefaultWallets({ appName: "gitwork", chains });
 
 const wagmiClient = createClient({ autoConnect: true, connectors, provider });
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider chains={chains}>
         <ThemeProvider>
-          <Component {...pageProps} />
+          <SessionProvider session={session}>
+            <Component {...pageProps} />
+          </SessionProvider>
         </ThemeProvider>
       </RainbowKitProvider>
     </WagmiConfig>
