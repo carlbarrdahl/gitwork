@@ -12,7 +12,7 @@ import {
 export function useContractAddresses(contractName: string) {
   const { activeChain } = useNetwork();
   const chain = activeChain?.id || 31337;
-  const contract = config[chain][contractName] || {};
+  const contract = (config[chain] || {})[contractName] || {};
   //   if (!contract) throw new Error("Contract not found: " + contractName);
   return contract;
 }
@@ -59,6 +59,19 @@ export function useFund() {
   );
 
   return fund;
+}
+
+export function useClaim() {
+  const { addressOrName, contractInterface } = useContractAddresses(
+    contracts.bountyRegistry
+  );
+
+  return useContractWriteRefresh(
+    { addressOrName, contractInterface },
+    "claim",
+    {},
+    "Claimed"
+  );
 }
 
 export function useFunding(repo, issue, token) {

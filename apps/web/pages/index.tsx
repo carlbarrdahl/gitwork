@@ -1,10 +1,11 @@
-import { Button } from "ui";
+import Layout from "components/Layout";
+import { Button, Heading } from "ui";
 
 export default function Web() {
   return (
-    <div>
-      <h1>Web</h1>
-      <Button>Hello</Button>
-    </div>
+    <Layout>
+      <Heading>Recently funded</Heading>
+      <Heading>Recently claimed</Heading>
+    </Layout>
   );
 }
