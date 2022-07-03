@@ -4,6 +4,7 @@ import { ethers } from "hardhat";
 import { BountyRegistryV1, Token } from "../typechain";
 const { getMnemonicWallet } = require("../utils/getMnemonicWallet");
 
+// 0x572d68996392eD58b53b995DF1D2968380df419A
 function createHash(values: [string, string]) {
   return ethers.utils.solidityKeccak256(
     ["bytes"],

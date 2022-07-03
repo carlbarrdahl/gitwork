@@ -1,7 +1,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
 
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -15,7 +14,7 @@ contract BountyRegistryV1 is Ownable, ReentrancyGuard {
     struct Funding {
         address funder;
         uint256 amount;
-        uint64 timestamp;
+        uint64 lockedUntil;
     }
 
     mapping(bytes32 => uint256) public bounties;
@@ -26,6 +25,7 @@ contract BountyRegistryV1 is Ownable, ReentrancyGuard {
         uint32 issue,
         IERC20 indexed token,
         uint256 amount,
+        uint64 lockedUntil,
         address indexed funder
     );
     event Withdraw(
@@ -69,10 +69,17 @@ contract BountyRegistryV1 is Ownable, ReentrancyGuard {
         Funding storage funding = funders[id][msg.sender];
         funding.funder = msg.sender;
         funding.amount += _amount;
-        funding.timestamp = uint64(block.timestamp);
+        funding.lockedUntil = uint64(block.timestamp + lockedDuration);
         _token.transferFrom(msg.sender, address(this), _amount);
 
-        emit Funded(_repo, _issue, _token, _amount, msg.sender);
+        emit Funded(
+            _repo,
+            _issue,
+            _token,
+            _amount,
+            funding.lockedUntil,
+            msg.sender
+        );
     }
 
     /// @dev Funder can withdraw funds if `lockedDuration` has passed
@@ -85,7 +92,7 @@ contract BountyRegistryV1 is Ownable, ReentrancyGuard {
         Funding storage funding = funders[id][msg.sender];
         require(funding.amount > 0, "Not funded");
         require(
-            block.timestamp >= funding.timestamp + lockedDuration,
+            block.timestamp >= funding.lockedUntil,
             "Funds are still locked"
         );
         _token.transfer(msg.sender, funding.amount);

@@ -1,6 +1,6 @@
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import {
   VStack,
@@ -27,6 +27,7 @@ import {
   HStack,
 } from "ui";
 
+import { useToken } from "wagmi";
 import { GitHubIssue } from "types";
 import {
   useAllowance,
@@ -35,23 +36,24 @@ import {
   useFunding,
 } from "../hooks/useFund";
 import { ethers } from "ethers";
+import BountyAmount from "./BountyAmount";
+import { parseUnits } from "ethers/lib/utils";
 
 const { formatEther, parseEther } = ethers.utils;
 
+const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_ADDRESS;
 const FundModal = ({ repo, issue, onClose }) => {
+  const token = useToken({ address: TOKEN_ADDRESS });
   const { register, watch, handleSubmit } = useForm({
-    defaultValues: {
-      amount: null,
-      token: "0x01BE23585060835E02B77ef475b0Cc51aA1e0709",
-    },
+    defaultValues: { amount: null },
   });
   const initialRef = React.useRef(null);
 
   const amount = watch("amount");
-  const token = watch("token");
 
-  const allowance = useAllowance(token);
-  const approve = useApprove(amount, token);
+  console.log("TOKEN", token.data);
+  const allowance = useAllowance(TOKEN_ADDRESS);
+  const approve = useApprove(amount, TOKEN_ADDRESS);
   const fund = useFund();
 
   const allowanceAmount = useMemo(
@@ -61,16 +63,16 @@ const FundModal = ({ repo, issue, onClose }) => {
 
   const canFund = +allowanceAmount >= (amount || 0);
 
-  async function handleFund(values) {
+  async function handleFund({ amount }: any) {
     try {
-      const parsedAmount = parseEther(values.amount);
+      const parsedAmount = parseUnits(amount, token.data?.decimals);
       if (allowance.data?.gte(parsedAmount)) {
-        console.log("Fund", repo, issue.number, values);
+        console.log("Fund", repo, issue.number, parsedAmount.toString());
         fund.write({
-          args: [repo, issue.number, values.token, parsedAmount.toString()],
+          args: [repo, issue.number, TOKEN_ADDRESS, parsedAmount.toString()],
         });
       } else {
-        console.log("Approve", values);
+        console.log("Approve", amount, token.data);
         approve.write();
       }
     } catch (error) {
@@ -100,7 +102,7 @@ const FundModal = ({ repo, issue, onClose }) => {
 
             <FormControl mt={4}>
               <FormLabel>Token</FormLabel>
-              <Input {...register("token")} placeholder="USDC" />
+              <Input readOnly value={token.data?.symbol} />
             </FormControl>
           </ModalBody>
 
@@ -109,7 +111,13 @@ const FundModal = ({ repo, issue, onClose }) => {
               Approved allowance: {allowanceAmount}
             </Text>
             <HStack>
-              <Button type="submit" colorScheme="blue" mr={3}>
+              <Button
+                type="submit"
+                colorScheme="blue"
+                mr={3}
+                isLoading={fund.isLoading}
+                disabled={fund.isLoading}
+              >
                 {canFund ? "Fund" : "Approve"}
               </Button>
               <Button onClick={onClose}>Cancel</Button>
@@ -121,19 +129,13 @@ const FundModal = ({ repo, issue, onClose }) => {
   );
 };
 
-const TOKEN_ADDRESS = "0x01BE23585060835E02B77ef475b0Cc51aA1e0709";
 const FundIssue = ({ repo, issue }) => {
   const { onOpen, onClose, isOpen } = useDisclosure();
   const funding = useFunding(repo, issue.number, TOKEN_ADDRESS);
 
-  const fundedAmount = useMemo(
-    () => formatEther(funding.data || 0).toString(),
-    [funding.data]
-  );
-
   return (
     <>
-      {+fundedAmount ? <Text fontSize="sm">{fundedAmount} USDC</Text> : null}
+      <BountyAmount repo={repo} issue={issue.number} />
       <Button variant={"ghost"} onClick={onOpen}>
         Fund
       </Button>
@@ -144,31 +146,30 @@ const FundIssue = ({ repo, issue }) => {
   );
 };
 
+const stateLabels = {
+  open: "opened",
+  closed: "closed",
+};
 export default function IssueTable({ issues }: { issues: GitHubIssue[] }) {
   const { query } = useRouter();
-  const [isMounting, setMounting] = useState(true);
 
   const repo = [query.owner, query.repo].join("/");
-  useEffect(() => {
-    setMounting(false);
-  }, []);
-  if (isMounting) {
-    return null;
-  }
+
   return (
     <VStack divider={<StackDivider />} spacing={3} align="stretch">
       {issues.map((issue) => (
         <Flex key={issue.id} justify="space-between">
           <Box flex={1}>
             <NextLink href={issue.html_url} passHref>
-              <Link target={"_blank"}>
+              <Link target="_blank">
                 <Heading as="h5" fontSize="md" mb={2}>
                   {issue.title}
                 </Heading>
               </Link>
             </NextLink>
             <Text color={"gray.600"} fontSize="xs">
-              #{issue.number} opened {issue.created_at} by{" "}
+              #{issue.number} {stateLabels[issue.state] || issue.state}{" "}
+              {issue.created_at} by{" "}
               <NextLink href={`/${issue.user.login}`} passHref>
                 <Link>{issue.user.login}</Link>
               </NextLink>
