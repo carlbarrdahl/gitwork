@@ -18,7 +18,7 @@ import {
 import Layout from "components/Layout";
 import BountyAmount from "features/bounties/components/BountyAmount";
 import Link from "next/link";
-import { useClaim } from "features/bounties/hooks/useFund";
+import { useBounty, useClaim } from "features/bounties/hooks/useFund";
 import { ethers } from "ethers";
 import { getSession } from "next-auth/react";
 
@@ -29,11 +29,10 @@ export default function RepoPage({ error, event, commit, hash, sig }) {
   const { owner, repo, issue_number } = router.query;
   const claim = useClaim();
   console.log(error, event, commit);
-  console.log(hash, sig);
   async function handleClaim() {
     try {
       claim.write({
-        args: [repo, issue_number, TOKEN_ADDRESS, hash, sig],
+        args: [[owner, repo].join("/"), issue_number, TOKEN_ADDRESS, hash, sig],
       });
     } catch (error) {
       console.log(error);

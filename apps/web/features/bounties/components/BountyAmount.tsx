@@ -15,11 +15,11 @@ const BountyAmount = ({ repo = "", issue = "", ...props }) => {
     [funding.data, token.data]
   );
 
-  return (
+  return +bountyAmount ? (
     <Text as="span" {...props}>
       {bountyAmount} USDC
     </Text>
-  );
+  ) : null;
 };
 
 export default BountyAmount;
