@@ -48,7 +48,8 @@ const FundModal = ({ repo, issue, onClose }) => {
   const { addressOrName: fundingToken } = useContractAddresses(
     contracts.fundingToken
   );
-  const token = useToken({ address: fundingToken });
+
+  const token = useToken({ address: fundingToken, enabled: !!fundingToken });
   const { register, watch, handleSubmit } = useForm({
     defaultValues: { amount: null },
   });
@@ -66,7 +67,6 @@ const FundModal = ({ repo, issue, onClose }) => {
   );
 
   const canFund = +allowanceAmount >= (amount || 0);
-
   async function handleFund({ amount }: any) {
     try {
       const parsedAmount = parseUnits(amount, token.data?.decimals);
@@ -76,7 +76,8 @@ const FundModal = ({ repo, issue, onClose }) => {
           .writeAsync({
             args: [repo, issue.number, fundingToken, parsedAmount.toString()],
           })
-          .then(onClose);
+          .then(onClose)
+          .catch(console.log);
       } else {
         console.log("Approve", amount, token.data);
         approve.write();

@@ -16,7 +16,7 @@ import { UseContractWriteArgs } from "wagmi/dist/declarations/src/hooks/contract
 
 export function useContractAddresses(contractName: string) {
   const { activeChain } = useNetwork();
-  const chain = activeChain?.id || 31337;
+  const chain = activeChain?.id || 10;
   const contract = (config[chain] || {})[contractName] || {};
   //   if (!contract) throw new Error("Contract not found: " + contractName);
   return contract;

@@ -10,7 +10,6 @@ import { publicProvider } from "wagmi/providers/public";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
 const isDev = process.env.NODE_ENV !== "production";
-
 const { chains, provider } = configureChains(
   isDev ? [chain.hardhat] : [chain.optimism],
   isDev
