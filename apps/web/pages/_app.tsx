@@ -21,6 +21,17 @@ const { connectors } = getDefaultWallets({ appName: "gitwork", chains });
 
 const wagmiClient = createClient({ autoConnect: true, connectors, provider });
 
+wagmiClient.queryClient.setDefaultOptions({
+  queries: {
+    cacheTime: 1_000 * 60 * 60 * 24, // 24 hours
+    networkMode: "offlineFirst",
+    refetchOnWindowFocus: true,
+    retry: 0,
+  },
+  mutations: {
+    networkMode: "offlineFirst",
+  },
+});
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
     <WagmiConfig client={wagmiClient}>
