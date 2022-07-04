@@ -32,7 +32,7 @@ export default function Web() {
     <Layout>
       <Container>
         <Box mb={8} textAlign="center">
-          <Heading fontSize={"5xl"} fontFamily="logo">
+          <Heading fontWeight={"normal"} fontSize={"6xl"} fontFamily="logo">
             .gitwork
           </Heading>
         </Box>
