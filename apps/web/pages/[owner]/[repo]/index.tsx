@@ -3,14 +3,7 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { Octokit } from "@octokit/core";
 
-import {
-  Button,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  HStack,
-  Link,
-} from "ui";
+import { Button, Breadcrumb, BreadcrumbItem, BreadcrumbLink, HStack } from "ui";
 
 import { GitHubIssue } from "types";
 import IssueTable from "features/bounties/components/IssueTable";
