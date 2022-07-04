@@ -1,6 +1,7 @@
 import BountyRegistry from "contracts/BountyRegistryV1.json";
 import { erc20ABI } from "wagmi";
 
+export const isDev = process.env.NODE_ENV !== "production";
 export const contracts = {
   bountyRegistry: "bountyRegistry",
   fundingToken: "fundingToken",
@@ -35,3 +36,7 @@ export const config = {
     },
   },
 };
+
+export function getContractConfig(contractName: string, chain?: number) {
+  return (config[chain || isDev ? 31337 : 10] || {})[contractName] || {};
+}

@@ -48,7 +48,6 @@ const FundModal = ({ repo, issue, onClose }) => {
   const { addressOrName: fundingToken } = useContractAddresses(
     contracts.fundingToken
   );
-
   const token = useToken({ address: fundingToken, enabled: !!fundingToken });
   const { register, watch, handleSubmit } = useForm({
     defaultValues: { amount: null },

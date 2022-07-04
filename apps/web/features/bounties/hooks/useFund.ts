@@ -1,4 +1,4 @@
-import { config, contracts } from "config";
+import { config, contracts, getContractConfig } from "config";
 import { ethers } from "ethers";
 import { useEffect } from "react";
 import { useQueryClient } from "react-query";
@@ -15,11 +15,8 @@ import {
 import { UseContractWriteArgs } from "wagmi/dist/declarations/src/hooks/contracts/useContractWrite";
 
 export function useContractAddresses(contractName: string) {
-  const { activeChain } = useNetwork();
-  const chain = activeChain?.id || 10;
-  const contract = (config[chain] || {})[contractName] || {};
-  //   if (!contract) throw new Error("Contract not found: " + contractName);
-  return contract;
+  const { chain } = useNetwork();
+  return getContractConfig(contractName, chain?.id);
 }
 
 export function useApprove(amount, addressOrName = "") {
