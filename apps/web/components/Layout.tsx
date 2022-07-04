@@ -21,11 +21,16 @@ export default function Layout(props: PropsWithChildren) {
         <HStack>
           <Link href={"/"}>
             <Text
+              fontFamily={"logo"}
               fontSize={"sm"}
-              sx={{ cursor: "pointer", "&:hover": { opacity: 0.8 } }}
-              fontWeight="bold"
+              letterSpacing={1}
+              p={3}
+              sx={{
+                cursor: "pointer",
+                "&:hover": { opacity: 0.6 },
+              }}
             >
-              .gitwork
+              &gt; .gitwork
             </Text>
           </Link>
           <NavLink href={"/"}>Bounties</NavLink>
