@@ -25,7 +25,6 @@ import {
   NumberInput,
   NumberInputField,
   HStack,
-  useToast,
 } from "ui";
 
 import { useToken } from "wagmi";

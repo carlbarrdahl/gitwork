@@ -32,6 +32,7 @@ wagmiClient.queryClient.setDefaultOptions({
     networkMode: "offlineFirst",
   },
 });
+
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
     <WagmiConfig client={wagmiClient}>
