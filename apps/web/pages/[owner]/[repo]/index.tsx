@@ -3,7 +3,14 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { Octokit } from "@octokit/core";
 
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "ui";
+import {
+  Button,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  HStack,
+  Link,
+} from "ui";
 
 import { GitHubIssue } from "types";
 import IssueTable from "features/bounties/components/IssueTable";
@@ -14,19 +21,29 @@ export default function RepoPage({ issues = [] }) {
   const { owner, repo } = router.query;
   return (
     <Layout>
-      <Breadcrumb fontSize={"xl"} color="blue.600" mb={8}>
-        <BreadcrumbItem>
-          <NextLink href={`/${owner}`} passHref>
-            <BreadcrumbLink>{owner}</BreadcrumbLink>
-          </NextLink>
-        </BreadcrumbItem>
+      <HStack justify="space-between">
+        <Breadcrumb fontSize={"xl"} color="blue.600" mb={8}>
+          <BreadcrumbItem>
+            <NextLink href={`/${owner}`} passHref>
+              <BreadcrumbLink>{owner}</BreadcrumbLink>
+            </NextLink>
+          </BreadcrumbItem>
 
-        <BreadcrumbItem isCurrentPage>
-          <NextLink href={`/${owner}/${repo}`} passHref>
-            <BreadcrumbLink>{repo}</BreadcrumbLink>
-          </NextLink>
-        </BreadcrumbItem>
-      </Breadcrumb>
+          <BreadcrumbItem isCurrentPage>
+            <NextLink href={`/${owner}/${repo}`} passHref>
+              <BreadcrumbLink>{repo}</BreadcrumbLink>
+            </NextLink>
+          </BreadcrumbItem>
+        </Breadcrumb>
+        <NextLink
+          href={`https://github.com/${owner}/${repo}/issues/new/choose`}
+          passHref
+        >
+          <a target="_blank">
+            <Button>New issue</Button>
+          </a>
+        </NextLink>
+      </HStack>
       <IssueTable issues={issues} />
     </Layout>
   );
