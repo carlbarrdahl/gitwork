@@ -19,14 +19,24 @@ export default function Layout(props: PropsWithChildren) {
     <Container maxW={"container.lg"}>
       <Flex as="header" py={4} justifyContent="space-between">
         <HStack>
-          <Text fontSize={"sm"} fontWeight="bold">
-            .gitwork
-          </Text>
+          <Link href={"/"}>
+            <Text
+              fontSize={"sm"}
+              sx={{ cursor: "pointer", "&:hover": { opacity: 0.8 } }}
+              fontWeight="bold"
+            >
+              .gitwork
+            </Text>
+          </Link>
           <NavLink href={"/"}>Bounties</NavLink>
         </HStack>
         <HStack>
-          <ConnectGithub />
-          <ConnectButton />
+          <Box>
+            <ConnectGithub />
+          </Box>
+          <Box>
+            <ConnectButton />
+          </Box>
         </HStack>
       </Flex>
       <Box py={4}>{props.children}</Box>
