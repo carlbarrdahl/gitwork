@@ -18,21 +18,23 @@ import {
 import Layout from "components/Layout";
 import BountyAmount from "features/bounties/components/BountyAmount";
 import Link from "next/link";
-import { useBounty, useClaim } from "features/bounties/hooks/useFund";
+import {
+  useClaim,
+  useContractAddresses,
+} from "features/bounties/hooks/useFund";
 import { ethers } from "ethers";
 import { getSession } from "next-auth/react";
-
-const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_ADDRESS;
+import { contracts } from "config";
 
 export default function RepoPage({ error, event, commit, hash, sig }) {
+  const { addressOrName } = useContractAddresses(contracts.fundingToken);
   const router = useRouter();
   const { owner, repo, issue_number } = router.query;
   const claim = useClaim();
-  console.log(error, event, commit);
   async function handleClaim() {
     try {
       claim.write({
-        args: [[owner, repo].join("/"), issue_number, TOKEN_ADDRESS, hash, sig],
+        args: [[owner, repo].join("/"), issue_number, addressOrName, hash, sig],
       });
     } catch (error) {
       console.log(error);
@@ -72,7 +74,12 @@ export default function RepoPage({ error, event, commit, hash, sig }) {
             at {commit.commit.author.date}
           </Text>
 
-          <Button w="100%" onClick={handleClaim}>
+          <Button
+            w="100%"
+            onClick={handleClaim}
+            isLoading={claim.isLoading}
+            disabled={claim.isLoading}
+          >
             Claim Bounty
           </Button>
         </Container>
@@ -92,8 +99,17 @@ export async function getServerSideProps({
 
   const wallet = ethers.Wallet.fromMnemonic(WALLET_MNEMONIC);
   const session = await getSession({ req });
-  console.log("session", session);
+
   const { address, owner, repo } = query;
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
 
   try {
     const props = await octokit
@@ -114,6 +130,14 @@ export async function getServerSideProps({
             ref: event.commit_id,
           })
           .then((r) => r.data);
+
+        if (session.githubId !== commit.committer?.id) {
+          return {
+            props: {
+              error: { message: "User not authorized to claim bounty" },
+            },
+          };
+        }
 
         // Create hash and signature
         const hash = ethers.utils.solidityKeccak256(

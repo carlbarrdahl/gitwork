@@ -1,13 +1,18 @@
 import { config, contracts } from "config";
 import { ethers } from "ethers";
+import { useEffect } from "react";
+import { useQueryClient } from "react-query";
+
 import {
   erc20ABI,
   useAccount,
+  useContractEvent,
   useContractRead,
   useContractWrite,
   useNetwork,
   useWaitForTransaction,
 } from "wagmi";
+import { UseContractWriteArgs } from "wagmi/dist/declarations/src/hooks/contracts/useContractWrite";
 
 export function useContractAddresses(contractName: string) {
   const { activeChain } = useNetwork();
@@ -20,9 +25,10 @@ export function useContractAddresses(contractName: string) {
 export function useApprove(amount, addressOrName = "") {
   const registry = useContractAddresses(contracts.bountyRegistry);
   return useContractWriteRefresh(
-    { addressOrName, contractInterface: erc20ABI },
-    "approve",
     {
+      addressOrName,
+      contractInterface: erc20ABI,
+      functionName: "approve",
       args: [
         registry.addressOrName,
         ethers.utils.parseEther(amount || "0").toString(),
@@ -36,14 +42,13 @@ export function useAllowance(addressOrName) {
   const account = useAccount();
   const registry = useContractAddresses(contracts.bountyRegistry);
 
-  return useContractRead(
-    { addressOrName, contractInterface: erc20ABI },
-    "allowance",
-    {
-      args: [account.data?.address, registry.addressOrName],
-      enabled: registry.addressOrName && account.data?.address,
-    }
-  );
+  return useContractRead({
+    addressOrName,
+    contractInterface: erc20ABI,
+    functionName: "allowance",
+    args: [account.address, registry.addressOrName],
+    enabled: registry.addressOrName && account.address,
+  });
 }
 
 export function useFund() {
@@ -52,9 +57,11 @@ export function useFund() {
   );
 
   const fund = useContractWriteRefresh(
-    { addressOrName, contractInterface },
-    "fund",
-    {},
+    {
+      addressOrName,
+      contractInterface,
+      functionName: "fund",
+    },
     "Funded"
   );
 
@@ -67,9 +74,7 @@ export function useClaim() {
   );
 
   return useContractWriteRefresh(
-    { addressOrName, contractInterface },
-    "claim",
-    {},
+    { addressOrName, contractInterface, functionName: "claim" },
     "Claimed"
   );
 }
@@ -79,32 +84,46 @@ export function useFunding(repo, issue, token) {
     contracts.bountyRegistry
   );
 
-  return useContractRead({ addressOrName, contractInterface }, "getBounty", {
+  return useContractRead({
+    addressOrName,
+    contractInterface,
+    functionName: "getBounty",
     args: [repo, issue, token],
     enabled: Boolean(token),
   });
 }
 
 export function useContractWriteRefresh(
-  contractConfig,
-  method: string,
-  opts,
+  contractConfig: UseContractWriteArgs,
   eventName: string = ""
 ) {
-  const contract = useContractWrite(contractConfig, method, opts);
+  const cache = useQueryClient();
+  const contract = useContractWrite(contractConfig);
+
+  const tx = useWaitForTransaction({
+    hash: contract.data?.hash,
+    enabled: !!contract.data?.hash,
+  });
+
+  useEffect(() => {
+    if (tx.status === "success") {
+      console.log("INVAIDATE");
+      cache.invalidateQueries();
+    }
+  }, [tx.status]);
 
   // Listen to event and invalidate cache
-  //   useContractEvent(
-  //     contractConfig,
-  //     eventName,
-  //     (e) => {
-  //       console.log("Event received", eventName, e);
-  //       cache.invalidateQueries();
-  //     },
-  //     {
-  //       once: true,
-  //     }
-  //   );
+  console.log("useContractWrite", eventName, contract.data);
+  useContractEvent({
+    addressOrName: contractConfig.addressOrName,
+    contractInterface: contractConfig.contractInterface,
+    eventName,
+    listener: (event) => {
+      console.log("event", eventName, event);
+      cache.invalidateQueries();
+    },
+    once: true,
+  });
 
   return contract;
 }

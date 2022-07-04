@@ -25,6 +25,7 @@ import {
   NumberInput,
   NumberInputField,
   HStack,
+  useToast,
 } from "ui";
 
 import { useToken } from "wagmi";
@@ -32,18 +33,22 @@ import { GitHubIssue } from "types";
 import {
   useAllowance,
   useApprove,
+  useContractAddresses,
   useFund,
   useFunding,
 } from "../hooks/useFund";
 import { ethers } from "ethers";
 import BountyAmount from "./BountyAmount";
 import { parseUnits } from "ethers/lib/utils";
+import { contracts } from "config";
 
 const { formatEther, parseEther } = ethers.utils;
 
-const TOKEN_ADDRESS = process.env.NEXT_PUBLIC_TOKEN_ADDRESS;
 const FundModal = ({ repo, issue, onClose }) => {
-  const token = useToken({ address: TOKEN_ADDRESS });
+  const { addressOrName: fundingToken } = useContractAddresses(
+    contracts.fundingToken
+  );
+  const token = useToken({ address: fundingToken });
   const { register, watch, handleSubmit } = useForm({
     defaultValues: { amount: null },
   });
@@ -51,9 +56,8 @@ const FundModal = ({ repo, issue, onClose }) => {
 
   const amount = watch("amount");
 
-  console.log("TOKEN", token.data);
-  const allowance = useAllowance(TOKEN_ADDRESS);
-  const approve = useApprove(amount, TOKEN_ADDRESS);
+  const allowance = useAllowance(fundingToken);
+  const approve = useApprove(amount, fundingToken);
   const fund = useFund();
 
   const allowanceAmount = useMemo(
@@ -68,9 +72,11 @@ const FundModal = ({ repo, issue, onClose }) => {
       const parsedAmount = parseUnits(amount, token.data?.decimals);
       if (allowance.data?.gte(parsedAmount)) {
         console.log("Fund", repo, issue.number, parsedAmount.toString());
-        fund.write({
-          args: [repo, issue.number, TOKEN_ADDRESS, parsedAmount.toString()],
-        });
+        fund
+          .writeAsync({
+            args: [repo, issue.number, fundingToken, parsedAmount.toString()],
+          })
+          .then(onClose);
       } else {
         console.log("Approve", amount, token.data);
         approve.write();
@@ -115,8 +121,8 @@ const FundModal = ({ repo, issue, onClose }) => {
                 type="submit"
                 colorScheme="blue"
                 mr={3}
-                isLoading={fund.isLoading}
-                disabled={fund.isLoading}
+                isLoading={approve.isLoading || fund.isLoading}
+                disabled={approve.isLoadng || fund.isLoading}
               >
                 {canFund ? "Fund" : "Approve"}
               </Button>
@@ -130,8 +136,11 @@ const FundModal = ({ repo, issue, onClose }) => {
 };
 
 const FundIssue = ({ repo, issue }) => {
+  const { addressOrName: fundingToken } = useContractAddresses(
+    contracts.fundingToken
+  );
   const { onOpen, onClose, isOpen } = useDisclosure();
-  const funding = useFunding(repo, issue.number, TOKEN_ADDRESS);
+  const funding = useFunding(repo, issue.number, fundingToken);
 
   return (
     <>
