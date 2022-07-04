@@ -38,5 +38,5 @@ export const config = {
 };
 
 export function getContractConfig(contractName: string, chain?: number) {
-  return (config[chain || isDev ? 31337 : 10] || {})[contractName] || {};
+  return (config[chain || (isDev ? 31337 : 10)] || {})[contractName] || {};
 }
