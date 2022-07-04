@@ -21,8 +21,8 @@ export default function RepoPage({ issues = [] }) {
   const { owner, repo } = router.query;
   return (
     <Layout>
-      <HStack justify="space-between">
-        <Breadcrumb fontSize={"xl"} color="blue.600" mb={8}>
+      <HStack justify="space-between" mb={8}>
+        <Breadcrumb fontSize={"xl"} color="blue.600">
           <BreadcrumbItem>
             <NextLink href={`/${owner}`} passHref>
               <BreadcrumbLink>{owner}</BreadcrumbLink>
