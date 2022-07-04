@@ -3,6 +3,7 @@
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
+import { parseEther } from "ethers/lib/utils";
 import { ethers, network } from "hardhat";
 const { getMnemonicWallet } = require("../utils/getMnemonicWallet");
 
@@ -25,9 +26,20 @@ async function main() {
   // We get the contract to deploy
   const BountyRegistry = await ethers.getContractFactory("BountyRegistryV1");
   const Verifier = await ethers.getContractFactory("Verifier");
+  const Token = await ethers.getContractFactory("Token");
+
   const verifier = await Verifier.deploy(verifierWallet.address);
   await verifier.deployed();
 
+  const token = await Token.deploy();
+  await token.deployed();
+
+  await token.mint(
+    "0x277D95C4646827Ea5996E998B31704C0964F79b1",
+    parseEther("1000.0")
+  );
+
+  console.log("Token deployed to:", token.address);
   console.log("Verifier deployed to:", verifier.address);
 
   const registry = await BountyRegistry.deploy(verifier.address);

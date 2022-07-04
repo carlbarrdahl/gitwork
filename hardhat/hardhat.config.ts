@@ -9,6 +9,8 @@ import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import { formatEther, parseEther } from "ethers/lib/utils";
+import { ethers } from "hardhat";
 dotenv.config();
 
 const { getMnemonicWallet } = require("./utils/getMnemonicWallet");
@@ -69,6 +71,24 @@ const config: HardhatUserConfig = {
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
 };
+
+task("faucet", "Transfer ETH")
+  .addParam("to", "The account's address")
+  .setAction(async (taskArgs, hre) => {
+    const [deployer] = await hre.ethers.getSigners();
+
+    console.log("deployer", await deployer.getBalance());
+    try {
+      // deployer.connect(hre.ethers.provider);
+      await deployer.sendTransaction({
+        to: taskArgs.to,
+        value: parseEther("1"),
+      });
+      console.log("Sent!");
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
 task("docgen", "Generate NatSpec", async (taskArgs, hre) => {
   // @ts-ignore
