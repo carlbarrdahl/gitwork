@@ -32,6 +32,7 @@ import { GitHubIssue } from "types";
 import {
   useAllowance,
   useApprove,
+  useBountyAmount,
   useContractAddresses,
   useFund,
   useFunding,
@@ -50,6 +51,22 @@ const stateLabels = {
   open: "opened",
   closed: "closed",
 };
+
+function ClaimBounty({ repo, issue }) {
+  const { amount, symbol } = useBountyAmount(repo, issue);
+  return (
+    <HStack>
+      {+amount ? (
+        <NextLink href={`/${repo}/${issue.number}/claim`}>
+          <Button>
+            Claim {amount} {symbol}
+          </Button>
+        </NextLink>
+      ) : null}
+    </HStack>
+  );
+}
+
 export default function ClosedIssueTable({}: {}) {
   const { query } = useRouter();
   const session = useSession();
@@ -92,12 +109,7 @@ export default function ClosedIssueTable({}: {}) {
               </NextLink>
             </Text>
           </Box>
-          <HStack>
-            <BountyAmount repo={repo} issue={issue.number} />
-            <NextLink href={`/${repo}/${issue.number}/claim`}>
-              <Button>Claim</Button>
-            </NextLink>
-          </HStack>
+          <ClaimBounty repo={repo} issue={issue.number} />
         </Flex>
       ))}
     </VStack>

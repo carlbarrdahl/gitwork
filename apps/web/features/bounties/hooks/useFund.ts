@@ -1,6 +1,7 @@
 import { config, contracts, getContractConfig } from "config";
 import { ethers } from "ethers";
-import { useEffect } from "react";
+import { formatUnits } from "ethers/lib/utils";
+import { useEffect, useMemo } from "react";
 import { useQueryClient } from "react-query";
 
 import {
@@ -10,6 +11,7 @@ import {
   useContractRead,
   useContractWrite,
   useNetwork,
+  useToken,
   useWaitForTransaction,
 } from "wagmi";
 import { UseContractWriteArgs } from "wagmi/dist/declarations/src/hooks/contracts/useContractWrite";
@@ -123,4 +125,19 @@ export function useContractWriteRefresh(
   });
 
   return contract;
+}
+
+export function useBountyAmount(repo, issue) {
+  const { addressOrName } = useContractAddresses(contracts.fundingToken);
+  const token = useToken({
+    address: addressOrName,
+    enabled: !!addressOrName,
+  });
+  const funding = useFunding(repo, issue, addressOrName);
+
+  const amount = useMemo(
+    () => formatUnits(funding.data || 0, token.data?.decimals).toString(),
+    [funding.data, token.data]
+  );
+  return { amount, symbol: token.data?.symbol };
 }
