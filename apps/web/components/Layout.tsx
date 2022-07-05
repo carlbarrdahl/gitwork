@@ -1,7 +1,22 @@
 import Link from "next/link";
 import { PropsWithChildren, useState, useEffect } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Box, Button, Container, Flex, HStack, Text } from "ui";
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  HStack,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+} from "ui";
+
+import { HamburgerIcon, BellIcon } from "ui/icons";
+
 import ConnectGithub from "features/auth/components/ConnectGithub";
 
 export default function Layout(props: PropsWithChildren) {
@@ -17,7 +32,7 @@ export default function Layout(props: PropsWithChildren) {
 
   return (
     <Container maxW={"container.lg"}>
-      <Flex as="header" py={4} justifyContent="space-between">
+      <Flex as="header" py={0} justifyContent="space-between">
         <HStack>
           <Link href={"/"}>
             <Text
@@ -35,14 +50,30 @@ export default function Layout(props: PropsWithChildren) {
           </Link>
           <NavLink href={"/"}>Bounties</NavLink>
         </HStack>
-        <HStack>
+        <HStack display={["none", "none", "flex"]}>
+          <Box>
+            <ConnectButton showBalance={false} />
+          </Box>
           <Box>
             <ConnectGithub />
           </Box>
-          <Box>
-            <ConnectButton />
-          </Box>
         </HStack>
+        <Menu colorScheme="white">
+          <MenuButton
+            display={["block", "block", "none"]}
+            as={IconButton}
+            aria-label="Menu"
+            icon={<HamburgerIcon />}
+          />
+          <MenuList>
+            <MenuItem>
+              <ConnectButton showBalance={false} />
+            </MenuItem>
+            <MenuItem>
+              <ConnectGithub w="100%" variant="ghost" />
+            </MenuItem>
+          </MenuList>
+        </Menu>
       </Flex>
       <Box py={4}>{props.children}</Box>
     </Container>
