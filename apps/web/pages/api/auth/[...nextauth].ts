@@ -21,6 +21,7 @@ export default NextAuth({
       return redirect || url || baseUrl;
     },
     async jwt({ token, account }) {
+      console.log("account", account);
       if (account) {
         token.githubId = +account.providerAccountId;
         token.accessToken = account.access_token;

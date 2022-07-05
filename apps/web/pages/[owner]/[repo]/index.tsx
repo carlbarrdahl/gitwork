@@ -3,15 +3,30 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { Octokit } from "@octokit/core";
 
-import { Button, Breadcrumb, BreadcrumbItem, BreadcrumbLink, HStack } from "ui";
+import {
+  Button,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  HStack,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+} from "ui";
 
 import { GitHubIssue } from "types";
 import IssueTable from "features/bounties/components/IssueTable";
 import Layout from "components/Layout";
+import ClosedIssueTable from "features/bounties/components/ClosedIssueTable";
 
 export default function RepoPage({ issues = [] }) {
   const router = useRouter();
   const { owner, repo } = router.query;
+  const hash = router.asPath.split("#")[1] || "bounties";
+  const tabs = ["bounties", "closed"];
+
   return (
     <Layout>
       <HStack justify="space-between" mb={8}>
@@ -37,7 +52,25 @@ export default function RepoPage({ issues = [] }) {
           </a>
         </NextLink>
       </HStack>
-      <IssueTable issues={issues} />
+      <Tabs defaultIndex={tabs.findIndex((t) => t === hash)}>
+        <TabList>
+          <Tab as="a" href="#bounties">
+            Bounties
+          </Tab>
+          <Tab as="a" href="#closed">
+            Closed
+          </Tab>
+        </TabList>
+
+        <TabPanels>
+          <TabPanel>
+            <IssueTable issues={issues} />
+          </TabPanel>
+          <TabPanel>
+            <ClosedIssueTable />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </Layout>
   );
 }
