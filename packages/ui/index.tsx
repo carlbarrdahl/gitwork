@@ -6,6 +6,10 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 export * from "@chakra-ui/react";
 
 const theme = extendTheme({
+  config: {
+    initialColorMode: "light",
+    useSystemColorMode: false,
+  },
   fonts: {
     logo: `'IBM Plex Mono', 'Open Sans', sans-serif`,
   },
