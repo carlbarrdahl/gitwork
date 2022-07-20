@@ -31,7 +31,7 @@ export const config = {
       contractInterface: erc20ABI,
     },
     [contracts.bountyRegistry]: {
-      addressOrName: "0x8171bb4B063c34e33B839FEB895aAdA3a57b880D",
+      addressOrName: "0x7ef8Dd9c5c68DF6E697091A17A6F699b204F8762",
       contractInterface: BountyRegistry.abi,
     },
   },

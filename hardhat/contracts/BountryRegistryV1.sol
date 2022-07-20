@@ -21,7 +21,8 @@ contract BountyRegistryV1 is Ownable, ReentrancyGuard {
     mapping(bytes32 => mapping(address => Funding)) public funders;
 
     event Funded(
-        string indexed repo,
+        bytes32 id,
+        string repo,
         uint32 issue,
         IERC20 indexed token,
         uint256 amount,
@@ -29,14 +30,16 @@ contract BountyRegistryV1 is Ownable, ReentrancyGuard {
         address indexed funder
     );
     event Withdraw(
-        string indexed repo,
+        bytes32 id,
+        string repo,
         uint32 issue,
         IERC20 indexed token,
         uint256 amount,
         address indexed funder
     );
     event Claimed(
-        string indexed repo,
+        bytes32 id,
+        string repo,
         uint32 issue,
         IERC20 indexed token,
         uint256 amount,
@@ -73,6 +76,7 @@ contract BountyRegistryV1 is Ownable, ReentrancyGuard {
         _token.transferFrom(msg.sender, address(this), _amount);
 
         emit Funded(
+            id,
             _repo,
             _issue,
             _token,
@@ -98,7 +102,7 @@ contract BountyRegistryV1 is Ownable, ReentrancyGuard {
         _token.transfer(msg.sender, funding.amount);
         bounties[id] -= funding.amount;
         funding.amount = 0;
-        emit Withdraw(_repo, _issue, _token, funding.amount, msg.sender);
+        emit Withdraw(id, _repo, _issue, _token, funding.amount, msg.sender);
     }
 
     function claim(
@@ -116,7 +120,7 @@ contract BountyRegistryV1 is Ownable, ReentrancyGuard {
         bounties[id] = 0;
 
         IERC20(_token).transfer(msg.sender, amount);
-        emit Claimed(_repo, _issue, _token, amount, msg.sender);
+        emit Claimed(id, _repo, _issue, _token, amount, msg.sender);
     }
 
     function setLockedDuration(uint64 _duration) public onlyOwner {
